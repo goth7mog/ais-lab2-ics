@@ -1,0 +1,29 @@
+services:
+  openplc:
+    image: openplc:v3
+    container_name: openplc-runtime
+    ports:
+      - "8080:8080"
+      - "502:502"
+    networks:
+      ot-net:
+        ipv4_address: 10.0.50.10
+    restart: unless-stopped
+
+  hmi-client:
+    image: ubuntu:22.04
+    container_name: hmi-client
+    tty: true
+    stdin_open: true
+    networks:
+      ot-net:
+        ipv4_address: 10.0.50.20
+    restart: unless-stopped
+
+networks:
+  ot-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.50.0/24
+          gateway: 10.0.50.1
