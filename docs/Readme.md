@@ -236,6 +236,75 @@ labb2-ics/
 └── README.md
 ```
 
+
+## Part 2 — IT/OT Network Segmentation (Purdue Model)
+
+This phase focused on implementing secure industrial network segmentation using the Purdue Model.
+
+### Implemented Zones
+
+| Zone | Subnet | Purpose |
+|------|---------|---------|
+| IT Zone | 10.0.10.0/24 | Workstation and monitoring |
+| DMZ | 10.0.30.0/24 | Jump server and IDS |
+| OT Zone | 10.0.50.0/24 | PLC and HMI systems |
+
+### Components
+
+- OpenPLC (PLC Runtime)
+- HMI Client
+- Jump Server / Bastion Host
+- Suricata IDS
+- Wazuh Manager
+- IT Workstation
+
+### Security Controls
+
+- Network segmentation using Docker networks
+- Industrial DMZ architecture
+- iptables firewall rules
+- Deny-all / allow-required-only policy
+- Controlled OT access through jump server
+- SSH hardening on bastion host
+- Restricted Modbus communication
+
+### Segmentation Tests
+
+| Test | Expected Result | Status |
+|------|-----------------|--------|
+| IT → OT direct access | Blocked | PASS |
+| IT → PLC Modbus access | Blocked | PASS |
+| IT → Jump Server SSH | Allowed | PASS |
+| Jump Server → PLC | Allowed | PASS |
+| OT → IT direct access | Blocked | PASS |
+
+### Result
+
+The environment successfully demonstrated:
+
+- Purdue-model segmentation
+- Secure IT/OT separation
+- Controlled OT access through DMZ
+- Firewall enforcement with iptables
+- Industrial network isolation principles
+
+### Evidence
+
+Screenshots included:
+- Docker segmented environment
+- Firewall rules
+- Blocked IT/OT traffic
+- SSH access to jump server
+- PLC communication tests
+- Segmentation verification
+
+
+
+
+
+
+
+
 ---
 
 # ✅ Summary
