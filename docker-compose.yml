@@ -58,19 +58,24 @@ services:
 
     restart: unless-stopped
 
-  # ───────── SURICATA IDS ─────────
+    # ───────── SURICATA IDS ─────────
   suricata:
     image: jasonish/suricata:latest
     container_name: suricata-ids
-
-    network_mode: host
 
     cap_add:
       - NET_ADMIN
       - SYS_NICE
 
+    networks:
+      dmz:
+        ipv4_address: 10.0.30.30
+
+      ot-zone:
+        ipv4_address: 10.0.50.30
+
     command: >
-      suricata -i any -c /etc/suricata/suricata.yaml
+      suricata -i eth0 -c /etc/suricata/suricata.yaml
 
     volumes:
       - ./suricata/suricata.yaml:/etc/suricata/suricata.yaml

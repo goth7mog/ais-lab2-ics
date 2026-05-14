@@ -332,6 +332,18 @@ PLC Registers: [999, 0, 0, 0, 0]
 
 ---
 
+Screenshot 23 — Verifierad OT-trafik i Suricata IDS
+
+Suricata fångade och loggade nätverkstrafik från OT-miljön via eve.json. Detta verifierar att IDS-övervakningen och säkerhetspipelinen fungerar korrekt.
+
+Verifierat:
+- Suricata IDS packet capture
+- OT network flow logging
+- Cross-zone traffic monitoring
+- Real-time dashboard visibility
+- PLC communication monitoring
+
+
 # ✅ Summary
 
 This lab successfully demonstrated:

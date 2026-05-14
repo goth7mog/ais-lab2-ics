@@ -20,6 +20,14 @@ outputs:
       filetype: regular
       filename: eve.json
 
+      types:
+        - alert
+        - flow
+        - dns
+        - http
+        - tls
+        - modbus
+
   - fast:
       enabled: yes
       filename: fast.log
@@ -33,3 +41,6 @@ default-rule-path: /var/lib/suricata/rules
 
 rule-files:
   - ot-custom.rules
+
+af-packet:
+  - interface: eth0
