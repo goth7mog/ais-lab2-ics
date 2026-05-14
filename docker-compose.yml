@@ -1,0 +1,142 @@
+version: '3.9'
+
+services:
+
+  # ───────── OT ZONE ─────────
+  openplc:
+    image: openplc:v3
+    container_name: plc-runtime
+
+    ports:
+      - "8080:8080"
+      - "502:502"
+
+    networks:
+      ot-zone:
+        ipv4_address: 10.0.50.10
+
+    restart: unless-stopped
+
+  hmi-client:
+    image: ubuntu:22.04
+    container_name: hmi-client
+
+    tty: true
+    stdin_open: true
+
+    command: tail -f /dev/null
+
+    networks:
+      ot-zone:
+        ipv4_address: 10.0.50.20
+
+    restart: unless-stopped
+
+  # ───────── DMZ ─────────
+  jump-server:
+    image: ubuntu:22.04
+    container_name: jump-server
+
+    tty: true
+    stdin_open: true
+
+    command: tail -f /dev/null
+
+    cap_add:
+      - NET_ADMIN
+
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
+
+    networks:
+      dmz:
+        ipv4_address: 10.0.30.10
+
+      ot-zone:
+        ipv4_address: 10.0.50.100
+
+    restart: unless-stopped
+
+  # ───────── SURICATA IDS ─────────
+  suricata:
+    image: jasonish/suricata:latest
+    container_name: suricata-ids
+
+    network_mode: host
+
+    cap_add:
+      - NET_ADMIN
+      - SYS_NICE
+
+    command: >
+      suricata -i any -c /etc/suricata/suricata.yaml
+
+    volumes:
+      - ./suricata/suricata.yaml:/etc/suricata/suricata.yaml
+      - ./suricata/rules:/var/lib/suricata/rules
+      - ./suricata/logs:/var/log/suricata
+
+    restart: unless-stopped
+
+  # ───────── IT ZONE ─────────
+  it-workstation:
+    image: ubuntu:22.04
+    container_name: it-workstation
+
+    tty: true
+    stdin_open: true
+
+    command: tail -f /dev/null
+
+    networks:
+      it-zone:
+        ipv4_address: 10.0.10.50
+
+      dmz:
+        ipv4_address: 10.0.30.50
+
+    restart: unless-stopped
+
+  # ───────── WAZUH SIEM ─────────
+  wazuh-manager:
+    image: wazuh/wazuh-manager:4.14.5
+    container_name: wazuh-manager
+
+    ports:
+      - "1514:1514"
+      - "1515:1515"
+      - "55000:55000"
+
+    networks:
+      it-zone:
+        ipv4_address: 10.0.10.20
+
+      dmz:
+        ipv4_address: 10.0.30.20
+
+    restart: unless-stopped
+
+# ───────── NETWORKS ─────────
+networks:
+
+  it-zone:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.10.0/24
+          gateway: 10.0.10.1
+
+  dmz:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.30.0/24
+          gateway: 10.0.30.1
+
+  ot-zone:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.0.50.0/24
+          gateway: 10.0.50.1

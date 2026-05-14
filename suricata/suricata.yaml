@@ -1,0 +1,35 @@
+%YAML 1.1
+---
+
+vars:
+  address-groups:
+    IT_NET: "10.0.10.0/24"
+    DMZ_NET: "10.0.30.0/24"
+    OT_NET: "10.0.50.0/24"
+    HOME_NET: "[10.0.10.0/24,10.0.30.0/24,10.0.50.0/24]"
+    EXTERNAL_NET: "!$HOME_NET"
+
+  port-groups:
+    MODBUS_PORTS: "502"
+
+default-log-dir: /var/log/suricata
+
+outputs:
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json
+
+  - fast:
+      enabled: yes
+      filename: fast.log
+
+app-layer:
+  protocols:
+    modbus:
+      enabled: yes
+
+default-rule-path: /var/lib/suricata/rules
+
+rule-files:
+  - ot-custom.rules

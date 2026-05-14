@@ -1,0 +1,19 @@
+# ═══════════════════════════════════════════════
+# OT/ICS Suricata-regler — Labb 2
+# ═══════════════════════════════════════════════
+
+# --- Modbus funktionskoder ---
+
+alert modbus any any -> $OT_NET $MODBUS_PORTS (msg:"OT-ALERT: Modbus Write Single Coil from non-OT source"; flow:to_server,established; modbus: function 5; classtype:attempted-admin; sid:1000001; rev:1;)
+
+alert modbus any any -> $OT_NET $MODBUS_PORTS (msg:"OT-ALERT: Modbus Write Single Register detected"; flow:to_server,established; modbus: function 6; classtype:attempted-admin; sid:1000002; rev:1;)
+
+alert modbus any any -> $OT_NET $MODBUS_PORTS (msg:"OT-CRITICAL: Modbus Write Multiple Coils - mass change"; flow:to_server,established; modbus: function 15; classtype:attempted-admin; sid:1000003; rev:1; priority:1;)
+
+alert modbus any any -> $OT_NET $MODBUS_PORTS (msg:"OT-CRITICAL: Modbus Write Multiple Registers - mass change"; flow:to_server,established; modbus: function 16; classtype:attempted-admin; sid:1000004; rev:1; priority:1;)
+
+alert ip $IT_NET any -> $OT_NET any (msg:"OT-ALERT: Direct IT-to-OT traffic detected (bypass DMZ)"; classtype:policy-violation; sid:1000010; rev:1; priority:2;)
+
+alert tcp any any -> $OT_NET any (msg:"OT-ALERT: Potential port scan on OT network"; flags:S; threshold:type both, track by_src, count 5, seconds 10; classtype:attempted-recon; sid:1000012; rev:1;)
+
+alert icmp any any -> $OT_NET any (msg:"OT-INFO: ICMP traffic to OT zone"; classtype:misc-activity; sid:1000013; rev:1;)
