@@ -298,10 +298,22 @@ Screenshots included:
 - PLC communication tests
 - Segmentation verification
 
+## Del 3 — OT-övervakning och Zero Trust
 
+I denna del byggdes övervakning och säkerhetskontroller för OT/ICS-miljön.
 
+Miljön består av segmenterade nätverk för IT, DMZ och OT där kommunikation sker via en säker jump server. OpenPLC användes som PLC-simulator och Modbus TCP användes för kommunikation mellan systemen.
 
+Följande komponenter implementerades:
 
+- Wazuh SIEM för logginsamling och säkerhetsövervakning
+- Suricata IDS för nätverksdetektion och OT-trafikanalys
+- Real-tidsdashboard för övervakning av cross-zone trafik
+- Zero Trust OT Gateway för kontrollerad åtkomst till OT-zonen
+- Audit logging av alla OT-kommandon och användaraktiviteter
+- Rollbaserad åtkomstkontroll för PLC-operationer
+
+Projektet demonstrerar hur säker OT-kommunikation kan implementeras genom segmentering, övervakning och kontrollerad åtkomst via jump server-arkitektur.
 
 
 
