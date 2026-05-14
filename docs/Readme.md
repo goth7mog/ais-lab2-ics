@@ -315,7 +315,20 @@ Följande komponenter implementerades:
 
 Projektet demonstrerar hur säker OT-kommunikation kan implementeras genom segmentering, övervakning och kontrollerad åtkomst via jump server-arkitektur.
 
+## Del 4 — Incidentrespons och OT-attacksimulering
 
+I denna del simulerades attacker mot OT-miljön för att testa segmentering, åtkomstkontroller och möjligheter till detektion.
+
+### Simulerad OT-attack från IT-zonen
+
+En Modbus TCP-attack genomfördes från IT-arbetsstationen mot PLC:n i OT-zonen. Attacken använde obehöriga Modbus write-kommandon för att manipulera PLC-register och simulera processpåverkan.
+
+Attacken lyckades och visade att direkt kommunikation mellan IT-zonen och OT-zonen fortfarande var möjlig. Detta indikerar att segmenteringen mellan zonerna var bristfällig och att ytterligare brandväggsregler eller nätverkskontroller behövs för att blockera otillåten trafik.
+
+Manipulationen verifierades genom att läsa PLC-register efter attacken:
+
+```text
+PLC Registers: [999, 0, 0, 0, 0]
 
 ---
 
