@@ -2,7 +2,7 @@
 
 ## Overview
 
-This lab demonstrates a simulated Industrial Control System (ICS) environment focused on OT/ICS security, Modbus TCP communication, and network visibility.
+This project demonstrates a simulated Industrial Control System (ICS) / SCADA environment focused on OT/ICS security, Modbus TCP communication, network segmentation, monitoring, and incident response.
 
 The environment was built using Docker containers and simulates communication between a PLC runtime and a Human Machine Interface (HMI) client inside an isolated OT network.
 
@@ -12,8 +12,11 @@ The lab focuses on:
 * OT network communication
 * Modbus TCP analysis
 * Packet capture and traffic inspection
-* Attack surface identification
-* OT security documentation
+* IT/OT segmentation using the Purdue Model
+* IDS and SIEM monitoring
+* Zero Trust access control
+* OT attack simulation and incident response
+* ICS-CERT style reporting
 
 ---
 
@@ -52,8 +55,9 @@ Container status was verified using:
 docker ps
 ```
 
-### Screenshot
+### Screenshots
 
+* `screenshots/01-openplc-running.png`
 * `screenshots/02-docker-ps.png`
 * `screenshots/03-docker-network.png`
 
@@ -95,10 +99,6 @@ simple_process.st
 ## PLC Runtime
 
 The PLC runtime was successfully started and verified.
-
-### Screenshot
-
-* `screenshots/01-openplc-running.png`
 
 ---
 
@@ -175,8 +175,6 @@ The ICS architecture and OT communication flow were documented.
 
 ## Architecture
 
-The environment consisted of:
-
 ```text
 HMI Client  --->  Modbus TCP  --->  OpenPLC Runtime
 ```
@@ -187,9 +185,9 @@ HMI Client  --->  Modbus TCP  --->  OpenPLC Runtime
 2. Modbus traffic is unencrypted
 3. OpenPLC web interface exposed without TLS
 4. Standard credentials used
-5. No IDS or monitoring enabled yet
-6. No network segmentation beyond Docker OT network
-7. PLC registers can be queried directly over the network
+5. No IDS or monitoring enabled initially
+6. Limited network segmentation in the original OT setup
+7. PLC registers accessible directly over the network
 
 ## Network Scanning
 
@@ -201,7 +199,7 @@ nmap -sT -p 1-1024 10.0.50.10 10.0.50.20
 
 ## Security Reflection
 
-Industrial protocols such as Modbus TCP were designed for trusted and isolated environments and therefore lack modern security mechanisms such as:
+Industrial protocols such as Modbus TCP were originally designed for trusted and isolated environments and therefore lack modern security mechanisms such as:
 
 * Encryption
 * Authentication
@@ -216,161 +214,224 @@ This creates significant risks in modern connected OT environments.
 
 ---
 
-# 📁 Project Structure
-
-```text
-labb2-ics/
-├── docs/
-│   └── ics-architecture.md
-├── screenshots/
-│   ├── 01-openplc-running.png
-│   ├── 02-docker-ps.png
-│   ├── 03-docker-network.png
-│   ├── 04-mbpoll-traffic.png
-│   ├── 05-modbus-tcpdump.png
-│   ├── 06-nmap-scan.png
-│   └── 07-ics-architecture.png
-├── docker-compose-ics.yml
-├── ot_traffic.pcap
-├── simple_process.st
-└── README.md
-```
-
-
-## Part 2 — IT/OT Network Segmentation (Purdue Model)
+# 🏭 Part 2 — IT/OT Network Segmentation (Purdue Model)
 
 This phase focused on implementing secure industrial network segmentation using the Purdue Model.
 
-### Implemented Zones
+## Implemented Zones
 
-| Zone | Subnet | Purpose |
-|------|---------|---------|
-| IT Zone | 10.0.10.0/24 | Workstation and monitoring |
-| DMZ | 10.0.30.0/24 | Jump server and IDS |
-| OT Zone | 10.0.50.0/24 | PLC and HMI systems |
+| Zone    | Subnet       | Purpose                     |
+| ------- | ------------ | --------------------------- |
+| IT Zone | 10.0.10.0/24 | Workstations and monitoring |
+| DMZ     | 10.0.30.0/24 | Jump server and IDS         |
+| OT Zone | 10.0.50.0/24 | PLC and HMI systems         |
 
-### Components
+## Components
 
-- OpenPLC (PLC Runtime)
-- HMI Client
-- Jump Server / Bastion Host
-- Suricata IDS
-- Wazuh Manager
-- IT Workstation
+* OpenPLC (PLC Runtime)
+* HMI Client
+* Jump Server / Bastion Host
+* Suricata IDS
+* Wazuh Manager
+* IT Workstation
 
-### Security Controls
+## Security Controls
 
-- Network segmentation using Docker networks
-- Industrial DMZ architecture
-- iptables firewall rules
-- Deny-all / allow-required-only policy
-- Controlled OT access through jump server
-- SSH hardening on bastion host
-- Restricted Modbus communication
+* Network segmentation using Docker networks
+* Industrial DMZ architecture
+* iptables firewall rules
+* Deny-all / allow-required-only policy
+* Controlled OT access through jump server
+* SSH hardening on bastion host
+* Restricted Modbus communication
 
-### Segmentation Tests
+## Segmentation Tests
 
-| Test | Expected Result | Status |
-|------|-----------------|--------|
-| IT → OT direct access | Blocked | PASS |
-| IT → PLC Modbus access | Blocked | PASS |
-| IT → Jump Server SSH | Allowed | PASS |
-| Jump Server → PLC | Allowed | PASS |
-| OT → IT direct access | Blocked | PASS |
+| Test                   | Expected Result | Status |
+| ---------------------- | --------------- | ------ |
+| IT → OT direct access  | Blocked         | PASS   |
+| IT → PLC Modbus access | Blocked         | PASS   |
+| IT → Jump Server SSH   | Allowed         | PASS   |
+| Jump Server → PLC      | Allowed         | PASS   |
+| OT → IT direct access  | Blocked         | PASS   |
 
-### Result
+## Result
 
 The environment successfully demonstrated:
 
-- Purdue-model segmentation
-- Secure IT/OT separation
-- Controlled OT access through DMZ
-- Firewall enforcement with iptables
-- Industrial network isolation principles
+* Purdue-model segmentation
+* Secure IT/OT separation
+* Controlled OT access through DMZ
+* Firewall enforcement with iptables
+* Industrial network isolation principles
 
 ### Evidence
 
 Screenshots included:
-- Docker segmented environment
-- Firewall rules
-- Blocked IT/OT traffic
-- SSH access to jump server
-- PLC communication tests
-- Segmentation verification
 
-## Del 3 — OT-övervakning och Zero Trust
-
-I denna del byggdes övervakning och säkerhetskontroller för OT/ICS-miljön.
-
-Miljön består av segmenterade nätverk för IT, DMZ och OT där kommunikation sker via en säker jump server. OpenPLC användes som PLC-simulator och Modbus TCP användes för kommunikation mellan systemen.
-
-Följande komponenter implementerades:
-
-- Wazuh SIEM för logginsamling och säkerhetsövervakning
-- Suricata IDS för nätverksdetektion och OT-trafikanalys
-- Real-tidsdashboard för övervakning av cross-zone trafik
-- Zero Trust OT Gateway för kontrollerad åtkomst till OT-zonen
-- Audit logging av alla OT-kommandon och användaraktiviteter
-- Rollbaserad åtkomstkontroll för PLC-operationer
-
-Projektet demonstrerar hur säker OT-kommunikation kan implementeras genom segmentering, övervakning och kontrollerad åtkomst via jump server-arkitektur.
-
-## Del 4 — Incidentrespons och OT-attacksimulering
-
-I denna del simulerades attacker mot OT-miljön för att testa segmentering, åtkomstkontroller och möjligheter till detektion.
-
-### Simulerad OT-attack från IT-zonen
-
-En Modbus TCP-attack genomfördes från IT-arbetsstationen mot PLC:n i OT-zonen. Attacken använde obehöriga Modbus write-kommandon för att manipulera PLC-register och simulera processpåverkan.
-
-Attacken lyckades och visade att direkt kommunikation mellan IT-zonen och OT-zonen fortfarande var möjlig. Detta indikerar att segmenteringen mellan zonerna var bristfällig och att ytterligare brandväggsregler eller nätverkskontroller behövs för att blockera otillåten trafik.
-
-Manipulationen verifierades genom att läsa PLC-register efter attacken:
-
-```text
-PLC Registers: [999, 0, 0, 0, 0]
+* Docker segmented environment
+* Firewall rules
+* Blocked IT/OT traffic
+* SSH access to jump server
+* PLC communication tests
+* Segmentation verification
 
 ---
 
-# Steg 17 — Verifierad OT-trafik i Suricata IDS
+# 🔍 Part 3 — OT Monitoring and Zero Trust
 
-Suricata fångade och loggade nätverkstrafik från OT-miljön via eve.json. Detta verifierar att IDS-övervakningen och säkerhetspipelinen fungerar korrekt.
+This phase focused on implementing monitoring and security controls for the OT/ICS environment.
 
-Verifierat:
-- Suricata IDS packet capture
-- OT network flow logging
-- Cross-zone traffic monitoring
-- Real-time dashboard visibility
-- PLC communication monitoring
+The environment consisted of segmented IT, DMZ, and OT networks where communication was routed through a secured jump server.
 
-# Steg 18
+## Implemented Components
 
-Incidentrespons genomfördes genom isolering av PLC-miljön, insamling av IDS- och accessloggar samt återställning av PLC till säkra standardvärden. Bevismaterial sparades för vidare analys och forensisk granskning.
+* Wazuh SIEM for centralized log collection and monitoring
+* Suricata IDS for OT traffic inspection and detection
+* Real-time monitoring dashboard for cross-zone visibility
+* Zero Trust OT Gateway for controlled OT access
+* Audit logging for OT commands and user activity
+* Role-based access control for PLC operations
+
+## Security Improvements
+
+The project demonstrates how secure OT communication can be implemented using:
+
+* Network segmentation
+* IDS monitoring
+* Centralized logging
+* Controlled OT access
+* Zero Trust principles
+* Jump server architecture
+
+---
+
+# 🚨 Part 4 — Incident Response and OT Attack Simulation
+
+This phase simulated attacks against the OT environment in order to test segmentation, access controls, monitoring, and incident response capabilities.
+
+## Simulated OT Attack from the IT Zone
+
+A Modbus TCP attack was executed from the IT workstation against the PLC in the OT zone.
+
+The attack used unauthorized Modbus write commands to manipulate PLC registers and simulate process manipulation.
+
+The attack demonstrated that direct communication between the IT zone and the OT zone was still possible in the initial configuration, highlighting the importance of stronger segmentation and firewall enforcement.
+
+## Manipulated PLC Values
+
+```text
+PLC Registers: [999, 0, 0, 0, 0]
+```
+
+The manipulated values simulated:
+
+* Dangerous tank level changes
+* Unauthorized process control
+* Potential industrial process disruption
+
+---
+
+# 📊 Step 17 — OT Traffic Detection via Suricata IDS
+
+Suricata successfully captured and logged OT network traffic through `eve.json`, verifying that the IDS monitoring pipeline functioned correctly.
+
+## Verified Capabilities
+
+* Suricata IDS packet capture
+* OT network flow logging
+* Cross-zone traffic monitoring
+* Real-time dashboard visibility
+* PLC communication monitoring
+
+---
+
+# 🧯 Step 18 — Incident Response and Recovery
+
+Incident response procedures were performed after the simulated OT attack.
+
+## Actions Performed
+
+* Isolation of the PLC environment
+* Collection of IDS logs and access logs
+* Preservation of forensic evidence
+* Recovery of PLC values to safe defaults
+* Verification of restored OT communication
+
+## Evidence Collected
+
+The following evidence was collected and stored:
+
+* Suricata IDS logs
+* Firewall rules
+* OT access logs
+* Network monitoring data
+* Recovery verification output
+
+---
+
+# 📑 Step 19 — ICS-CERT Incident Report
+
+An ICS-CERT-style incident report was created to document:
+
+* Attack timeline
+* Detection process
+* Incident impact
+* Recovery actions
+* Root cause analysis
+* Security recommendations
+
+The report demonstrates structured OT incident handling and industrial cybersecurity documentation.
+
+---
+
+# 🖼️ Screenshots
+
+The project contains screenshots verifying:
+
+* OpenPLC runtime
+* Docker OT networks
+* Modbus TCP traffic
+* IT/OT segmentation
+* Firewall enforcement
+* Suricata IDS detection
+* Zero Trust OT gateway
+* Incident response and recovery
+* OT monitoring dashboard
+
+---
 
 # ✅ Summary
 
-This lab successfully demonstrated:
+This project successfully demonstrated:
 
 * ICS/SCADA simulation
 * PLC runtime deployment
 * OT network communication
 * Modbus TCP analysis
 * Packet capture and traffic inspection
-* Attack surface identification
-* Basic industrial security analysis
+* Purdue-model segmentation
+* IT/OT separation
+* Suricata IDS monitoring
+* Wazuh SIEM integration
+* Zero Trust access control
+* OT attack simulation
+* Incident response and recovery
+* ICS-CERT incident reporting
+* Real-time OT monitoring
 
-The environment now provides a foundation for future work involving:
+The environment provides a strong foundation for future work involving:
 
-* IDS deployment
-* Suricata rules
-* Wazuh integration
-* IT/OT segmentation
-* Purdue model implementation
-* OT threat detection
+* Advanced OT threat detection
+* Custom Suricata rules
+* Industrial anomaly detection
+* IEC 62443 alignment
+* Secure industrial architecture
+* SOC and OT monitoring workflows
 
 ---
 
 # 👨‍💻 Author
 
-Abdihakim
+**Abdihakim**
 DevOps & Cybersecurity Student
