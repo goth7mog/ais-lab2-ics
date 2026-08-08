@@ -1,3 +1,4 @@
+
 services:
   openplc:
     image: openplc:v3
@@ -18,6 +19,18 @@ services:
     networks:
       ot-net:
         ipv4_address: 10.0.50.20
+    restart: unless-stopped
+
+  opener:
+    image: eipstackgroup/opener:latest
+    container_name: opener
+    ports:
+      - "44818:44818/tcp"
+      - "44818:44818/udp"
+      - "2222:2222/udp"
+    networks:
+      ot-net:
+        ipv4_address: 10.0.50.30
     restart: unless-stopped
 
 networks:
